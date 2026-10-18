@@ -20,6 +20,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+    <!-- Firebase SDK (Modular v10 com suas credenciais reais) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJFpx2thjrPmjXywTT3uS6IajwqcQSzhc",
+            authDomain: "braziliansammy-webhook.firebaseapp.com",
+            projectId: "braziliansammy-webhook",
+            storageBucket: "braziliansammy-webhook.firebasestorage.app",
+            messagingSenderId: "1008576534304",
+            appId: "1:1008576534304:web:5b9cd3b9c745c3a3112945",
+            measurementId: "G-1TEEF01XZE"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.firebaseCollections = { collection, addDoc, getDocs, deleteDoc, doc };
+        console.log("Firebase conectado com sucesso!");
+    </script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -190,7 +211,7 @@
             </button>
             <button id="tabQueueBtn" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>Fila de Agendamentos</span>
+                <span>Fila de Agendamentos (Cloud)</span>
                 <span id="queueBadge" class="bg-cyber-cyan text-cyber-bg px-1.5 py-0.2 rounded-full text-[10px] font-extrabold hidden">0</span>
             </button>
         </div>
@@ -318,9 +339,9 @@
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center space-x-2">
                             <span class="flex h-2 w-2 rounded-full bg-cyber-emerald shadow-neon-emerald"></span>
-                            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-300">Modo de Envio e Agendamento</h2>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-300">Modo de Envio e Agendamento Cloud</h2>
                         </div>
-                        <span class="text-xs text-cyber-emerald font-mono font-bold">TEMPORIZADOR</span>
+                        <span class="text-xs text-cyber-emerald font-mono font-bold">FIREBASE CLOUD</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 mb-4">
@@ -330,7 +351,7 @@
                         </button>
                         <button id="modeScheduleBtn" type="button" class="px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <span>Agendar Envio</span>
+                            <span>Agendar na Nuvem</span>
                         </button>
                     </div>
 
@@ -348,7 +369,7 @@
 
                         <div class="p-3 rounded-xl bg-cyber-emerald/10 border border-cyber-emerald/20 text-xs text-emerald-300 font-mono flex items-center space-x-2">
                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>A mensagem será armazenada e enviada automaticamente quando a data/hora for atingida se esta aba estiver aberta.</span>
+                            <span>A mensagem será gravada no Firebase Firestore e executada automaticamente na nuvem para qualquer usuário!</span>
                         </div>
                     </div>
                 </div>
@@ -427,12 +448,12 @@
                     <div>
                         <h2 class="text-lg font-bold text-white flex items-center space-x-2">
                             <svg class="w-5 h-5 text-cyber-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>Gerenciador de Mensagens Agendadas</span>
+                            <span>Fila de Agendamentos na Nuvem (Firebase)</span>
                         </h2>
-                        <p class="text-xs text-gray-400 mt-1">Mensagens pendentes na fila de execução automática local.</p>
+                        <p class="text-xs text-gray-400 mt-1">Mensagens pendentes gravadas no banco de dados para execução multi-usuário.</p>
                     </div>
-                    <button id="clearAllScheduledBtn" class="text-xs font-mono text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 px-3 py-1.5 rounded-lg transition-all">
-                        Limpar Todas
+                    <button id="refreshQueueBtn" class="text-xs font-mono text-cyber-cyan hover:text-white bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/30 px-3 py-1.5 rounded-lg transition-all">
+                        Atualizar Fila
                     </button>
                 </div>
 
@@ -441,7 +462,7 @@
 
                 <div id="emptyQueueMessage" class="text-center py-12 text-gray-500 font-mono text-sm">
                     <svg class="w-12 h-12 mx-auto mb-3 opacity-30 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    Nenhuma mensagem agendada no momento.
+                    Nenhuma mensagem agendada na nuvem no momento.
                 </div>
             </div>
         </div>
@@ -615,7 +636,7 @@
 
         const scheduledCardsGrid = document.getElementById('scheduledCardsGrid');
         const emptyQueueMessage = document.getElementById('emptyQueueMessage');
-        const clearAllScheduledBtn = document.getElementById('clearAllScheduledBtn');
+        const refreshQueueBtn = document.getElementById('refreshQueueBtn');
 
         function playBeep(type = 'success') {
             if (!soundEnabled) return;
@@ -673,8 +694,10 @@
             tabCreatorBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all';
             tabQueueContent.classList.remove('hidden');
             tabCreatorContent.classList.add('hidden');
-            renderQueueList();
+            fetchQueueFromCloud();
         });
+
+        refreshQueueBtn.addEventListener('click', fetchQueueFromCloud);
 
         modeImmediateBtn.addEventListener('click', () => {
             isScheduleMode = false;
@@ -690,7 +713,7 @@
             modeScheduleBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-cyber-emerald text-cyber-bg font-extrabold shadow-neon-emerald transition-all';
             modeImmediateBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all';
             scheduleInputs.classList.remove('hidden');
-            btnText.textContent = 'AGENDAR TRANSMISSÃO';
+            btnText.textContent = 'AGENDAR NA NUVEM';
             btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>';
 
             if (!scheduleDate.value) {
@@ -966,19 +989,27 @@
                     return;
                 }
 
-                const scheduledList = JSON.parse(localStorage.getItem('braziliansammy_system_scheduled') || '[]');
-                scheduledList.push({
-                    id: Date.now().toString(),
-                    url: url,
-                    payload: payload,
-                    targetTime: targetDateTime.getTime(),
-                    createdAt: Date.now()
-                });
-                localStorage.setItem('braziliansammy_system_scheduled', JSON.stringify(scheduledList));
+                try {
+                    sendWebhookBtn.disabled = true;
+                    showStatus('Salvando agendamento na nuvem do Firebase...', 'info');
 
-                showStatus(`MENSAGEM AGENDADA para ${targetDateTime.toLocaleString('pt-BR')}!`, 'schedule');
-                playBeep('schedule');
-                updateQueueBadge();
+                    const { collection, addDoc } = window.firebaseCollections;
+                    await addDoc(collection(window.db, "scheduled_messages"), {
+                        url: url,
+                        payload: payload,
+                        targetTime: targetDateTime.getTime(),
+                        createdAt: Date.now()
+                    });
+
+                    showStatus(`MENSAGEM AGENDADA NA NUVEM para ${targetDateTime.toLocaleString('pt-BR')}!`, 'schedule');
+                    playBeep('schedule');
+                    queueBadge.classList.remove('hidden');
+                } catch (err) {
+                    showStatus(`Erro ao salvar no Firebase: ${err.message}`, 'error');
+                    playBeep('error');
+                } finally {
+                    sendWebhookBtn.disabled = false;
+                }
                 return;
             }
 
@@ -1008,137 +1039,82 @@
             }
         });
 
-        function updateQueueBadge() {
-            const scheduledList = JSON.parse(localStorage.getItem('braziliansammy_system_scheduled') || '[]');
-            if (scheduledList.length > 0) {
-                queueBadge.textContent = scheduledList.length;
-                queueBadge.classList.remove('hidden');
-            } else {
-                queueBadge.classList.add('hidden');
-            }
-        }
-
-        function checkAndExecuteScheduledMessages() {
-            const scheduledList = JSON.parse(localStorage.getItem('braziliansammy_system_scheduled') || '[]');
-            if (scheduledList.length === 0) return;
-
-            const now = Date.now();
-            const remainingList = [];
-
-            scheduledList.forEach(async (item) => {
-                if (item.targetTime <= now) {
-                    try {
-                        await sendWebhookRequest(item.url, item.payload);
-                        showStatus(`[AUTOMÁTICO] Mensagem agendada enviada com sucesso!`, 'success');
-                        playBeep('success');
-                        if (typeof confetti === 'function') {
-                            confetti({ particleCount: 50, spread: 60, origin: { y: 0.5 } });
-                        }
-                    } catch (err) {
-                        showStatus(`[AUTOMÁTICO] Falha no agendamento: ${err.message}`, 'error');
-                        playBeep('error');
-                    }
-                } else {
-                    remainingList.push(item);
-                }
-            });
-
-            if (remainingList.length !== scheduledList.length) {
-                localStorage.setItem('braziliansammy_system_scheduled', JSON.stringify(remainingList));
-                updateQueueBadge();
-                renderQueueList();
-            }
-        }
-
-        setInterval(checkAndExecuteScheduledMessages, 2000);
-
-        function renderQueueList() {
-            const scheduledList = JSON.parse(localStorage.getItem('braziliansammy_system_scheduled') || '[]');
-            scheduledCardsGrid.innerHTML = '';
-
-            if (scheduledList.length === 0) {
-                emptyQueueMessage.classList.remove('hidden');
+        async function fetchQueueFromCloud() {
+            if (!window.db) {
+                showStatus('Firebase ainda está inicializando...', 'info');
                 return;
             }
-            emptyQueueMessage.classList.add('hidden');
 
-            scheduledList.forEach(item => {
-                const targetDate = new Date(item.targetTime);
-                const card = document.createElement('div');
-                card.className = 'glass-panel p-4 rounded-xl border border-white/10 space-y-3 relative overflow-hidden group';
+            try {
+                const { collection, getDocs } = window.firebaseCollections;
+                const querySnapshot = await getDocs(collection(window.db, "scheduled_messages"));
+                scheduledCardsGrid.innerHTML = '';
 
-                const titleText = item.payload.embeds?.[0]?.title || item.payload.content || 'Mensagem sem título';
-                
-                card.innerHTML = `
-                    <div class="flex items-start justify-between">
-                        <div class="space-y-1">
-                            <span class="text-[10px] font-mono bg-cyber-emerald/20 text-emerald-300 px-2 py-0.5 rounded border border-cyber-emerald/30">
-                                AGENDADA PARA: ${targetDate.toLocaleString('pt-BR')}
-                            </span>
-                            <h3 class="text-sm font-bold text-white line-clamp-1 mt-1">${titleText}</h3>
+                let count = 0;
+                querySnapshot.forEach((docSnap) => {
+                    count++;
+                    const item = docSnap.data();
+                    const docId = docSnap.id;
+                    const targetDate = new Date(item.targetTime);
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel p-4 rounded-xl border border-white/10 space-y-3 relative overflow-hidden group';
+
+                    const titleText = item.payload.embeds?.[0]?.title || item.payload.content || 'Mensagem sem título';
+                    
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div class="space-y-1">
+                                <span class="text-[10px] font-mono bg-cyber-emerald/20 text-emerald-300 px-2 py-0.5 rounded border border-cyber-emerald/30">
+                                    NUVEM: ${targetDate.toLocaleString('pt-BR')}
+                                </span>
+                                <h3 class="text-sm font-bold text-white line-clamp-1 mt-1">${titleText}</h3>
+                            </div>
+                            <button data-id="${docId}" class="delete-cloud-scheduled text-gray-500 hover:text-red-400 p-1 rounded transition-colors">
+                                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
                         </div>
-                        <button data-id="${item.id}" class="delete-scheduled text-gray-500 hover:text-red-400 p-1 rounded transition-colors">
-                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
-                    </div>
 
-                    <div class="text-xs font-mono text-gray-400 bg-cyber-bg/80 p-2 rounded-lg truncate">
-                        Target: ${item.url}
-                    </div>
+                        <div class="text-xs font-mono text-gray-400 bg-cyber-bg/80 p-2 rounded-lg truncate">
+                            Target: ${item.url}
+                        </div>
 
-                    <div class="flex items-center justify-between text-[11px] font-mono text-cyber-cyan pt-1">
-                        <span>CONTAGEM REGRESSIVA:</span>
-                        <span class="countdown-timer font-bold" data-target="${item.targetTime}">Calculando...</span>
-                    </div>
-                `;
+                        <div class="flex items-center justify-between text-[11px] font-mono text-cyber-cyan pt-1">
+                            <span>STATUS:</span>
+                            <span class="font-bold text-emerald-400">Armazenado no Firestore</span>
+                        </div>
+                    `;
 
-                card.querySelector('.delete-scheduled').addEventListener('click', (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    deleteScheduledItem(id);
+                    card.querySelector('.delete-cloud-scheduled').addEventListener('click', () => {
+                        deleteCloudItem(docId);
+                    });
+
+                    scheduledCardsGrid.appendChild(card);
                 });
 
-                scheduledCardsGrid.appendChild(card);
-            });
-
-            updateCountdowns();
-        }
-
-        function updateCountdowns() {
-            document.querySelectorAll('.countdown-timer').forEach(el => {
-                const target = parseInt(el.getAttribute('data-target'));
-                const diff = target - Date.now();
-
-                if (diff <= 0) {
-                    el.textContent = 'Enviando...';
-                    return;
+                if (count > 0) {
+                    emptyQueueMessage.classList.add('hidden');
+                    queueBadge.textContent = count;
+                    queueBadge.classList.remove('hidden');
+                } else {
+                    emptyQueueMessage.classList.add('hidden');
+                    queueBadge.classList.add('hidden');
                 }
-
-                const hrs = Math.floor(diff / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-                el.textContent = `${String(hrs).padStart(2,'0')}h ${String(mins).padStart(2,'0')}m ${String(secs).padStart(2,'0')}s`;
-            });
-        }
-        setInterval(updateCountdowns, 1000);
-
-        function deleteScheduledItem(id) {
-            let scheduledList = JSON.parse(localStorage.getItem('braziliansammy_system_scheduled') || '[]');
-            scheduledList = scheduledList.filter(item => item.id !== id);
-            localStorage.setItem('braziliansammy_system_scheduled', JSON.stringify(scheduledList));
-            updateQueueBadge();
-            renderQueueList();
-            showStatus('Agendamento cancelado com sucesso.', 'info');
-        }
-
-        clearAllScheduledBtn.addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja cancelar todas as mensagens agendadas?')) {
-                localStorage.removeItem('braziliansammy_system_scheduled');
-                updateQueueBadge();
-                renderQueueList();
-                showStatus('Fila de agendamentos limpa.', 'info');
+            } catch (err) {
+                showStatus('Erro ao carregar fila da nuvem.', 'error');
             }
-        });
+        }
+
+        async function deleteCloudItem(docId) {
+            if (!confirm('Deseja remover este agendamento do banco de dados na nuvem?')) return;
+            try {
+                const { doc, deleteDoc } = window.firebaseCollections;
+                await deleteDoc(doc(window.db, "scheduled_messages", docId));
+                fetchQueueFromCloud();
+                showStatus('Agendamento removido da nuvem.', 'info');
+            } catch (err) {
+                showStatus('Erro ao excluir item.', 'error');
+            }
+        }
 
         function showStatus(text, type) {
             statusConsole.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-cyber-blue/10', 'border-cyber-blue/30', 'text-cyber-cyan', 'bg-cyber-emerald/10', 'border-cyber-emerald/30', 'text-emerald-300');
@@ -1171,7 +1147,6 @@
         });
 
         loadPresets();
-        updateQueueBadge();
         updatePreview();
     </script>
 </body>
