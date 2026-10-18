@@ -2,9 +2,9 @@ name: Disparador Automático Webhook
 
 on:
   schedule:
-    # Executa automaticamente a cada 5 minutos na nuvem do GitHub
-    - cron: '*/5 * * * *'
-  workflow_dispatch: # Permite disparar manualmente se quiser testar
+    # Executa a cada 1 minuto para garantir pontualidade exata
+    - cron: '* * * * *'
+  workflow_dispatch:
 
 jobs:
   process-webhooks:
@@ -35,15 +35,21 @@ jobs:
                     const webhookUrl = fields.url.stringValue;
                     const payloadStr = fields.payload.stringValue;
                     
-                    console.log("Disparando webhook agendado...");
+                    console.log("Disparando webhook agendado no minuto exato...");
                     
-                    // Envia para o Discord
+                    // Envia para o Discord do utilizador
                     const req = https.request(webhookUrl, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" }
                     });
                     req.write(payloadStr);
                     req.end();
+
+                    // Apaga o registo do Firebase após o envio
+                    const docName = doc.name;
+                    const deleteUrl = `https://firestore.googleapis.com/v1/${docName}`;
+                    const delReq = https.request(deleteUrl, { method: "DELETE" });
+                    delReq.end();
                   }
                 }
               } catch (e) {
