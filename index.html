@@ -1,161 +1,1161 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrazilianSammy WebHook System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #1e293b;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: #38bdf8;
-        }
-        label {
-            display: block;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: #cbd5e1;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            background-color: #0f172a;
-            color: #fff;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
-        textarea {
-            resize: vertical;
-            height: 100px;
-        }
-        button {
-            width: 100%;
-            margin-top: 1.5rem;
-            padding: 0.75rem;
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #0369a1;
-        }
-    </style>
-</head>
-<body>
+    <title>BrazilianSammy WebHook System // Discord Commander & Scheduler</title>
+    
+    <!-- Configurações de Ícone para Tela Inicial / Favicon -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/qvkn2yXK/25-Sem-Titulo-20261017120112.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/qvkn2yXK/25-Sem-Titulo-20261017120112.png">
+    <meta name="apple-mobile-web-app-title" content="BrazilianSammy">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#030408">
 
-    <div class="container">
-        <h2>Agendador Webhook</h2>
-        
-        <label for="webhookUrl">URL do Webhook do Discord:</label>
-        <input type="url" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+    <!-- Google Fonts & Tailwind CSS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-        <label for="username">Nome do Bot (Opcional):</label>
-        <input type="text" id="username" placeholder="BrazilianSammy Bot">
-
-        <label for="avatarUrl">URL do Avatar (Opcional):</label>
-        <input type="url" id="avatarUrl" placeholder="https://exemplo.com/imagem.png">
-
-        <label for="messageContent">Mensagem:</label>
-        <textarea id="messageContent" placeholder="Digite a mensagem que será enviada..." required></textarea>
-
-        <label for="scheduleTime">Data e Hora do Envio:</label>
-        <input type="datetime-local" id="scheduleTime" required>
-
-        <button id="scheduleBtn">AGENDAR NA NUVEM</button>
-    </div>
-
-    <!-- Script de Integração com Firebase e Lógica de Envio -->
+    <!-- Firebase SDK (Modular v10 com suas credenciais reais) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Substitua com as suas credenciais reais do Firebase
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY_AQUI",
+            apiKey: "AIzaSyCJFpx2thjrPmjXywTT3uS6IajwqcQSzhc",
             authDomain: "braziliansammy-webhook.firebaseapp.com",
             projectId: "braziliansammy-webhook",
-            storageBucket: "braziliansammy-webhook.appspot.com",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SEU_APP_ID"
+            storageBucket: "braziliansammy-webhook.firebasestorage.app",
+            messagingSenderId: "1008576534304",
+            appId: "1:1008576534304:web:5b9cd3b9c745c3a3112945",
+            measurementId: "G-1TEEF01XZE"
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        window.db = getFirestore(app);
+        window.firebaseCollections = { collection, addDoc, getDocs, deleteDoc, doc };
+        console.log("Firebase conectado com sucesso!");
+    </script>
 
-        async function scheduleWebhook() {
-            const webhookUrl = document.getElementById("webhookUrl").value.trim();
-            const username = document.getElementById("username").value.trim() || "BrazilianSammy Bot";
-            const avatarUrl = document.getElementById("avatarUrl").value.trim();
-            const messageContent = document.getElementById("messageContent").value.trim();
-            const datetimeInput = document.getElementById("scheduleTime").value;
-
-            if (!webhookUrl || !messageContent || !datetimeInput) {
-                alert("Por favor, preencha a URL do Webhook, a Mensagem e a Data/Hora!");
-                return;
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        discord: {
+                            purple: '#5865F2',
+                            green: '#57F287',
+                            yellow: '#FEE75C',
+                            fuchsia: '#EB459E',
+                            red: '#ED4245',
+                            dark: '#313338',
+                            darker: '#2B2D31',
+                            darkest: '#1E1F22',
+                            chat: '#313338',
+                            embed: '#2B2D31'
+                        },
+                        cyber: {
+                            bg: '#030408',
+                            surface: '#0A0C14',
+                            border: 'rgba(88, 101, 242, 0.2)',
+                            cyan: '#00f2fe',
+                            blue: '#4facfe',
+                            neon: '#7928CA',
+                            pink: '#FF0080',
+                            emerald: '#10b981'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    boxShadow: {
+                        'neon-purple': '0 0 25px -5px rgba(88, 101, 242, 0.5), 0 0 10px -5px rgba(88, 101, 242, 0.3)',
+                        'neon-cyan': '0 0 25px -5px rgba(0, 242, 254, 0.5)',
+                        'neon-pink': '0 0 25px -5px rgba(255, 0, 128, 0.5)',
+                        'neon-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.5)'
+                    }
+                }
             }
+        }
+    </script>
 
-            // Converte a data selecionada para timestamp (milissegundos)
-            const targetTime = new Date(datetimeInput).getTime();
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0c14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e2238;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5865f2;
+        }
 
-            if (targetTime <= Date.now()) {
-                alert("O horário escolhido precisa ser no futuro!");
-                return;
+        .glass-panel {
+            background: rgba(10, 12, 20, 0.78);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-panel-glow {
+            position: relative;
+        }
+        .glass-panel-glow::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.4), rgba(0, 242, 254, 0.1), rgba(255, 0, 128, 0.3));
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+        .glass-panel-glow:hover::before {
+            opacity: 1;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 30%, #5865f2 70%, #ff0080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 6s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        .scanline-overlay {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.18) 50%,
+                rgba(0, 0, 0, 0.18)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        .cyber-input {
+            background: rgba(15, 18, 30, 0.85);
+            border: 1px solid rgba(88, 101, 242, 0.2);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cyber-input:focus {
+            border-color: #5865f2;
+            box-shadow: 0 0 15px rgba(88, 101, 242, 0.35);
+            background: rgba(20, 25, 45, 0.95);
+            outline: none;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-cyber-bg text-gray-100 font-sans min-h-full flex flex-col overflow-x-hidden selection:bg-discord-purple selection:text-white">
+
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+    <div class="fixed inset-0 scanline-overlay z-0 opacity-40"></div>
+
+    <div class="fixed top-1/4 -left-32 w-96 h-96 bg-discord-purple/20 rounded-full blur-[120px] pointer-events-none animate-pulse-glow z-0"></div>
+    <div class="fixed bottom-1/4 -right-32 w-96 h-96 bg-cyber-pink/20 rounded-full blur-[120px] pointer-events-none animate-pulse-glow z-0" style="animation-delay: 2s;"></div>
+
+    <header class="relative z-10 border-b border-white/10 glass-panel sticky top-0 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-discord-purple via-cyber-cyan to-cyber-pink p-0.5 shadow-neon-purple">
+                <div class="w-full h-full bg-cyber-bg rounded-[10px] flex items-center justify-center overflow-hidden">
+                    <img src="https://i.postimg.cc/qvkn2yXK/25-Sem-Titulo-20261017120112.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight gradient-text">BRAZILIANSAMMY SYSTEM</h1>
+                <p class="text-[10px] uppercase font-mono tracking-widest text-cyber-cyan/80">WEBHOOK COMMANDER & SCHEDULER</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button id="soundToggleBtn" title="Alternar Som de Feedback" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all border border-white/10 flex items-center space-x-1.5 text-xs font-mono">
+                <svg id="soundIcon" class="w-4 h-4 text-cyber-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>
+                <span id="soundLabel">SOM ON</span>
+            </button>
+            <button id="resetFormBtn" title="Resetar Campos do Formulário" class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all border border-white/10">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 space-y-6">
+
+        <div class="flex items-center space-x-2 border-b border-white/10 pb-3 overflow-x-auto">
+            <button id="tabCreatorBtn" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-discord-purple text-white shadow-neon-purple transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                <span>Criador de Mensagem</span>
+            </button>
+            <button id="tabQueueBtn" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Fila de Agendamentos (Cloud)</span>
+                <span id="queueBadge" class="bg-cyber-cyan text-cyber-bg px-1.5 py-0.2 rounded-full text-[10px] font-extrabold hidden">0</span>
+            </button>
+        </div>
+
+        <div id="tabCreatorContent" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <section class="lg:col-span-7 space-y-6">
+
+                <div class="glass-panel glass-panel-glow rounded-2xl p-5 md:p-6 shadow-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="flex h-2 w-2 rounded-full bg-cyber-cyan shadow-neon-cyan"></span>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-300">URL do Webhook de Destino</h2>
+                        </div>
+                        <button id="savePresetBtn" class="text-xs font-mono text-cyber-cyan hover:text-white bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/30 px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                            <span>Salvar Preset</span>
+                        </button>
+                    </div>
+
+                    <div class="relative">
+                        <input type="password" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." class="cyber-input w-full px-4 py-3 rounded-xl text-sm font-mono text-white placeholder-gray-500 pr-24">
+                        <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center space-x-1">
+                            <button id="toggleUrlVisibility" class="p-1.5 text-gray-400 hover:text-white rounded-lg transition-colors">
+                                <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                            <button id="validateWebhookBtn" class="px-2.5 py-1 text-xs font-semibold bg-white/10 hover:bg-white/20 text-gray-200 rounded-lg transition-all">
+                                Testar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="presetsContainer" class="mt-3 flex flex-wrap gap-2 items-center min-h-[28px]">
+                        <span class="text-[11px] text-gray-500 font-mono">Salvos:</span>
+                        <span id="noPresetsText" class="text-xs text-gray-600 italic">Nenhum webhook salvo</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel glass-panel-glow rounded-2xl p-5 md:p-6 shadow-2xl">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span class="flex h-2 w-2 rounded-full bg-discord-purple shadow-neon-purple"></span>
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-gray-300">Identidade do Bot</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Nome Customizado</label>
+                            <input type="text" id="botUsername" placeholder="BrazilianSammy Bot" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">URL do Avatar</label>
+                            <input type="url" id="botAvatar" placeholder="https://i.imgur.com/exemplo.png" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel glass-panel-glow rounded-2xl p-5 md:p-6 shadow-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="flex h-2 w-2 rounded-full bg-cyber-pink shadow-neon-pink"></span>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-300">Mensagem Principal</h2>
+                        </div>
+                        <span id="charCounter" class="text-xs font-mono text-gray-400">0 / 2000</span>
+                    </div>
+
+                    <textarea id="messageContent" rows="4" maxlength="2000" placeholder="Digite sua mensagem... (Suporta Markdown: **negrito**, *itálico*, `código`, ```bloco```)" class="cyber-input w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-600 resize-y min-h-[100px]"></textarea>
+                </div>
+
+                <div class="glass-panel glass-panel-glow rounded-2xl p-5 md:p-6 shadow-2xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="toggleEmbed" class="w-4 h-4 accent-discord-purple rounded cursor-pointer">
+                            <label for="toggleEmbed" class="text-sm font-bold uppercase tracking-wider text-gray-300 cursor-pointer select-none">
+                                Anexar Card de Embed Rico
+                            </label>
+                        </div>
+                        <span class="text-xs text-cyber-cyan font-mono">OPCIONAL</span>
+                    </div>
+
+                    <div id="embedFields" class="mt-5 space-y-4 hidden border-t border-white/10 pt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Título do Embed</label>
+                                <input type="text" id="embedTitle" placeholder="Alerta do Sistema: Transmissão Concluída" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Cor Lateral</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="color" id="embedColor" value="#5865F2" class="h-10 w-12 bg-transparent rounded cursor-pointer border border-white/10">
+                                    <input type="text" id="embedColorHex" value="#5865F2" class="cyber-input w-full px-3 py-2.5 rounded-xl text-xs font-mono text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1.5">Descrição do Embed</label>
+                            <textarea id="embedDescription" rows="3" placeholder="Descrição detalhada do conteúdo..." class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600 resize-y"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">URL da Imagem Grande</label>
+                                <input type="url" id="embedImage" placeholder="https://i.imgur.com/banner.png" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">URL da Miniatura (Thumbnail)</label>
+                                <input type="url" id="embedThumbnail" placeholder="https://i.imgur.com/icone.png" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Texto do Rodapé (Footer)</label>
+                                <input type="text" id="embedFooter" placeholder="BrazilianSammy System • Log" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">URL do Ícone do Rodapé</label>
+                                <input type="url" id="embedFooterIcon" placeholder="https://i.imgur.com/footer.png" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white placeholder-gray-600">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel glass-panel-glow rounded-2xl p-5 md:p-6 shadow-2xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="flex h-2 w-2 rounded-full bg-cyber-emerald shadow-neon-emerald"></span>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-gray-300">Modo de Envio e Agendamento Cloud</h2>
+                        </div>
+                        <span class="text-xs text-cyber-emerald font-mono font-bold">FIREBASE CLOUD</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <button id="modeImmediateBtn" type="button" class="px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-discord-purple text-white border border-discord-purple/50 shadow-neon-purple transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span>Enviar Imediatamente</span>
+                        </button>
+                        <button id="modeScheduleBtn" type="button" class="px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Agendar na Nuvem</span>
+                        </button>
+                    </div>
+
+                    <div id="scheduleInputs" class="hidden space-y-4 border-t border-white/10 pt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Data de Envio (Dia/Mês/Ano)</label>
+                                <input type="date" id="scheduleDate" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-400 mb-1.5">Hora e Minuto (HH:MM)</label>
+                                <input type="time" id="scheduleTime" class="cyber-input w-full px-3.5 py-2.5 rounded-xl text-sm text-white">
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-cyber-emerald/10 border border-cyber-emerald/20 text-xs text-emerald-300 font-mono flex items-center space-x-2">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>A mensagem será gravada no Firebase Firestore e executada automaticamente na nuvem para qualquer usuário!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="sendWebhookBtn" class="w-full relative group overflow-hidden rounded-2xl p-0.5 font-semibold text-white shadow-2xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]">
+                    <span id="btnGradient" class="absolute inset-0 bg-gradient-to-r from-discord-purple via-cyber-cyan to-cyber-pink transition-all duration-500 group-hover:opacity-100 opacity-90"></span>
+                    <span class="relative block px-6 py-4 rounded-[14px] bg-cyber-bg/90 backdrop-blur-xl group-hover:bg-transparent transition-all duration-300 text-center flex items-center justify-center space-x-3">
+                        <svg id="btnIcon" class="w-5 h-5 text-cyber-cyan group-hover:text-white transition-colors animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span id="btnText" class="font-bold text-base tracking-wide text-white uppercase font-mono">TRANSMITIR MENSAGEM AGORA</span>
+                    </span>
+                </button>
+
+            </section>
+
+            <section class="lg:col-span-5 space-y-6">
+                <div class="sticky top-20 space-y-4">
+                    
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xs font-mono uppercase tracking-widest text-gray-400 flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-discord-purple" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                            <span>Preview em Tempo Real</span>
+                        </h2>
+                        <span class="text-[10px] font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded text-gray-400">Cliente Discord Sync</span>
+                    </div>
+
+                    <div class="bg-discord-chat rounded-2xl p-4 md:p-5 border border-white/10 shadow-2xl text-gray-200 font-sans">
+                        <div class="pb-3 mb-4 border-b border-white/5 flex items-center space-x-2 text-xs font-medium text-gray-400">
+                            <span class="text-gray-500 font-bold text-base">#</span>
+                            <span class="text-gray-200">transmissao-agendada</span>
+                            <span class="bg-white/10 text-[10px] px-1.5 py-0.5 rounded text-gray-400 ml-auto">CANAL</span>
+                        </div>
+
+                        <div class="flex items-start space-x-3.5 group">
+                            <img id="previewAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Bot Avatar" class="w-10 h-10 rounded-full object-cover flex-shrink-0 bg-discord-darkest">
+
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-baseline space-x-2">
+                                    <span id="previewUsername" class="font-semibold text-white text-sm hover:underline cursor-pointer">BrazilianSammy</span>
+                                    <span class="bg-discord-purple text-white text-[9px] font-bold px-1.5 py-0.2 rounded uppercase tracking-wider">BOT</span>
+                                    <span id="previewTime" class="text-[11px] text-gray-400 font-normal">Hoje às 12:00</span>
+                                </div>
+
+                                <div id="previewMessage" class="mt-1 text-sm text-gray-300 break-words leading-relaxed whitespace-pre-wrap">
+                                    Aguardando transmissão da mensagem...
+                                </div>
+
+                                <div id="previewEmbedContainer" class="mt-2.5 hidden">
+                                    <div id="previewEmbedBorder" class="border-l-4 rounded-r-lg bg-discord-embed p-3.5 space-y-2 shadow-lg max-w-md">
+                                        <div id="previewEmbedTitle" class="font-bold text-white text-sm hover:underline cursor-pointer hidden"></div>
+                                        <div id="previewEmbedDescription" class="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed hidden"></div>
+                                        <img id="previewEmbedThumbnail" src="" alt="" class="max-w-[80px] max-h-[80px] rounded object-cover hidden float-right ml-2 mb-2">
+                                        <img id="previewEmbedImage" src="" alt="" class="w-full max-h-52 object-cover rounded-md mt-2 hidden">
+                                        <div id="previewEmbedFooterRow" class="flex items-center space-x-2 pt-1 hidden">
+                                            <img id="previewEmbedFooterIcon" src="" alt="" class="w-4 h-4 rounded-full object-cover hidden">
+                                            <span id="previewEmbedFooter" class="text-[11px] text-gray-400"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="statusConsole" class="hidden rounded-xl p-4 border text-xs font-mono transition-all duration-300"></div>
+
+                </div>
+            </section>
+
+        </div>
+
+        <div id="tabQueueContent" class="hidden space-y-6">
+            <div class="glass-panel glass-panel-glow rounded-2xl p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-cyber-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Fila de Agendamentos na Nuvem (Firebase)</span>
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">Mensagens pendentes gravadas no banco de dados para execução multi-usuário.</p>
+                    </div>
+                    <button id="refreshQueueBtn" class="text-xs font-mono text-cyber-cyan hover:text-white bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/30 px-3 py-1.5 rounded-lg transition-all">
+                        Atualizar Fila
+                    </button>
+                </div>
+
+                <div id="scheduledCardsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+
+                <div id="emptyQueueMessage" class="text-center py-12 text-gray-500 font-mono text-sm">
+                    <svg class="w-12 h-12 mx-auto mb-3 opacity-30 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Nenhuma mensagem agendada na nuvem no momento.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Seção de Créditos no Rodapé -->
+    <footer class="relative z-10 border-t border-white/10 glass-panel py-6 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+            <div class="flex items-center space-x-3">
+                <div class="w-7 h-7 rounded-lg overflow-hidden border border-cyber-cyan/30 flex-shrink-0">
+                    <img src="https://i.postimg.cc/qvkn2yXK/25-Sem-Titulo-20261017120112.png" alt="Logo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-white tracking-wider">BrazilianSammy WebHook System</p>
+                    <p class="text-[10px] text-gray-400 font-mono">Desenvolvido com tecnologia de ponta & alta performance.</p>
+                </div>
+            </div>
+            <div class="text-xs font-mono text-cyber-cyan/80 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                Criado por <span class="text-white font-bold">BrazilianSammy</span> &copy; 2026
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.5 + 0.2;
+                this.color = ['#5865F2', '#00f2fe', '#ff0080', '#10b981'][Math.floor(Math.random() * 4)];
             }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
 
-            // Monta o payload no formato exigido pelo Discord
-            const discordPayload = {
-                content: messageContent,
-                username: username,
-                ...(avatarUrl && { avatar_url: avatarUrl })
-            };
-
-            try {
-                // Salva no Firestore usando exatamente os nomes que o disparador lê
-                await addDoc(collection(db, "scheduled_messages"), {
-                    url: webhookUrl,
-                    targetTime: targetTime,
-                    payload: JSON.stringify(discordPayload),
-                    createdAt: Date.now()
-                });
-
-                alert("Mensagem agendada com sucesso na nuvem!");
-                
-                // Limpa os campos de texto principais
-                document.getElementById("messageContent").value = "";
-                document.getElementById("scheduleTime").value = "";
-            } catch (error) {
-                console.error("Erro ao agendar:", error);
-                alert("Erro ao salvar o agendamento. Verifique o console.");
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.globalAlpha = 1;
             }
         }
 
-        document.getElementById("scheduleBtn").addEventListener("click", scheduleWebhook);
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 12000);
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function connectParticles() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    const dx = particles[a].x - particles[b].x;
+                    const dy = particles[a].y - particles[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 110) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = '#5865F2';
+                        ctx.globalAlpha = (1 - distance / 110) * 0.15;
+                        ctx.lineWidth = 0.6;
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            connectParticles();
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        let soundEnabled = true;
+        let isScheduleMode = false;
+
+        const tabCreatorBtn = document.getElementById('tabCreatorBtn');
+        const tabQueueBtn = document.getElementById('tabQueueBtn');
+        const tabCreatorContent = document.getElementById('tabCreatorContent');
+        const tabQueueContent = document.getElementById('tabQueueContent');
+        const queueBadge = document.getElementById('queueBadge');
+
+        const modeImmediateBtn = document.getElementById('modeImmediateBtn');
+        const modeScheduleBtn = document.getElementById('modeScheduleBtn');
+        const scheduleInputs = document.getElementById('scheduleInputs');
+        const scheduleDate = document.getElementById('scheduleDate');
+        const scheduleTime = document.getElementById('scheduleTime');
+
+        const webhookUrlInput = document.getElementById('webhookUrl');
+        const toggleUrlVisibilityBtn = document.getElementById('toggleUrlVisibility');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const validateWebhookBtn = document.getElementById('validateWebhookBtn');
+        const savePresetBtn = document.getElementById('savePresetBtn');
+        const presetsContainer = document.getElementById('presetsContainer');
+        const noPresetsText = document.getElementById('noPresetsText');
+
+        const botUsernameInput = document.getElementById('botUsername');
+        const botAvatarInput = document.getElementById('botAvatar');
+        const messageContentInput = document.getElementById('messageContent');
+        const charCounter = document.getElementById('charCounter');
+
+        const toggleEmbedCheckbox = document.getElementById('toggleEmbed');
+        const embedFields = document.getElementById('embedFields');
+        const embedTitleInput = document.getElementById('embedTitle');
+        const embedColorInput = document.getElementById('embedColor');
+        const embedColorHexInput = document.getElementById('embedColorHex');
+        const embedDescriptionInput = document.getElementById('embedDescription');
+        const embedImageInput = document.getElementById('embedImage');
+        const embedThumbnailInput = document.getElementById('embedThumbnail');
+        const embedFooterInput = document.getElementById('embedFooter');
+        const embedFooterIconInput = document.getElementById('embedFooterIcon');
+
+        const sendWebhookBtn = document.getElementById('sendWebhookBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const btnGradient = document.getElementById('btnGradient');
+
+        const statusConsole = document.getElementById('statusConsole');
+        const resetFormBtn = document.getElementById('resetFormBtn');
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const soundLabel = document.getElementById('soundLabel');
+
+        const previewUsername = document.getElementById('previewUsername');
+        const previewAvatar = document.getElementById('previewAvatar');
+        const previewTime = document.getElementById('previewTime');
+        const previewMessage = document.getElementById('previewMessage');
+        const previewEmbedContainer = document.getElementById('previewEmbedContainer');
+        const previewEmbedBorder = document.getElementById('previewEmbedBorder');
+        const previewEmbedTitle = document.getElementById('previewEmbedTitle');
+        const previewEmbedDescription = document.getElementById('previewEmbedDescription');
+        const previewEmbedThumbnail = document.getElementById('previewEmbedThumbnail');
+        const previewEmbedImage = document.getElementById('previewEmbedImage');
+        const previewEmbedFooterRow = document.getElementById('previewEmbedFooterRow');
+        const previewEmbedFooter = document.getElementById('previewEmbedFooter');
+        const previewEmbedFooterIcon = document.getElementById('previewEmbedFooterIcon');
+
+        const scheduledCardsGrid = document.getElementById('scheduledCardsGrid');
+        const emptyQueueMessage = document.getElementById('emptyQueueMessage');
+        const refreshQueueBtn = document.getElementById('refreshQueueBtn');
+
+        function playBeep(type = 'success') {
+            if (!soundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'schedule') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) { console.log('Audio error:', e); }
+        }
+
+        soundToggleBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundLabel.textContent = soundEnabled ? 'SOM ON' : 'SOM OFF';
+            soundToggleBtn.classList.toggle('opacity-50', !soundEnabled);
+        });
+
+        tabCreatorBtn.addEventListener('click', () => {
+            tabCreatorBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-discord-purple text-white shadow-neon-purple transition-all';
+            tabQueueBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all';
+            tabCreatorContent.classList.remove('hidden');
+            tabQueueContent.classList.add('hidden');
+        });
+
+        tabQueueBtn.addEventListener('click', () => {
+            tabQueueBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-discord-purple text-white shadow-neon-purple transition-all';
+            tabCreatorBtn.className = 'tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all';
+            tabQueueContent.classList.remove('hidden');
+            tabCreatorContent.classList.add('hidden');
+            fetchQueueFromCloud();
+        });
+
+        refreshQueueBtn.addEventListener('click', fetchQueueFromCloud);
+
+        modeImmediateBtn.addEventListener('click', () => {
+            isScheduleMode = false;
+            modeImmediateBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-discord-purple text-white border border-discord-purple/50 shadow-neon-purple transition-all';
+            modeScheduleBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all';
+            scheduleInputs.classList.add('hidden');
+            btnText.textContent = 'TRANSMITIR MENSAGEM AGORA';
+            btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>';
+        });
+
+        modeScheduleBtn.addEventListener('click', () => {
+            isScheduleMode = true;
+            modeScheduleBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-cyber-emerald text-cyber-bg font-extrabold shadow-neon-emerald transition-all';
+            modeImmediateBtn.className = 'px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border border-white/10 transition-all';
+            scheduleInputs.classList.remove('hidden');
+            btnText.textContent = 'AGENDAR NA NUVEM';
+            btnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>';
+
+            if (!scheduleDate.value) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                scheduleDate.value = tomorrow.toISOString().split('T')[0];
+            }
+            if (!scheduleTime.value) {
+                const now = new Date();
+                scheduleTime.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            }
+        });
+
+        function updatePreview() {
+            const now = new Date();
+            previewTime.textContent = `Hoje às ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+            previewUsername.textContent = botUsernameInput.value.trim() || 'BrazilianSammy';
+
+            if (botAvatarInput.value.trim()) {
+                previewAvatar.src = botAvatarInput.value.trim();
+                previewAvatar.onerror = () => { previewAvatar.src = 'https://cdn.discordapp.com/embed/avatars/0.png'; };
+            } else {
+                previewAvatar.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
+            }
+
+            const content = messageContentInput.value;
+            charCounter.textContent = `${content.length} / 2000`;
+            previewMessage.textContent = content || 'Aguardando transmissão da mensagem...';
+
+            if (toggleEmbedCheckbox.checked) {
+                previewEmbedContainer.classList.remove('hidden');
+                
+                const colorHex = embedColorHexInput.value || '#5865F2';
+                previewEmbedBorder.style.borderColor = colorHex;
+
+                if (embedTitleInput.value.trim()) {
+                    previewEmbedTitle.textContent = embedTitleInput.value.trim();
+                    previewEmbedTitle.classList.remove('hidden');
+                } else {
+                    previewEmbedTitle.classList.add('hidden');
+                }
+
+                if (embedDescriptionInput.value.trim()) {
+                    previewEmbedDescription.textContent = embedDescriptionInput.value.trim();
+                    previewEmbedDescription.classList.remove('hidden');
+                } else {
+                    previewEmbedDescription.classList.add('hidden');
+                }
+
+                if (embedThumbnailInput.value.trim()) {
+                    previewEmbedThumbnail.src = embedThumbnailInput.value.trim();
+                    previewEmbedThumbnail.classList.remove('hidden');
+                    previewEmbedThumbnail.onerror = () => previewEmbedThumbnail.classList.add('hidden');
+                } else {
+                    previewEmbedThumbnail.classList.add('hidden');
+                }
+
+                if (embedImageInput.value.trim()) {
+                    previewEmbedImage.src = embedImageInput.value.trim();
+                    previewEmbedImage.classList.remove('hidden');
+                    previewEmbedImage.onerror = () => previewEmbedImage.classList.add('hidden');
+                } else {
+                    previewEmbedImage.classList.add('hidden');
+                }
+
+                const footerText = embedFooterInput.value.trim();
+                const footerIcon = embedFooterIconInput.value.trim();
+
+                if (footerText || footerIcon) {
+                    previewEmbedFooterRow.classList.remove('hidden');
+                    previewEmbedFooter.textContent = footerText;
+
+                    if (footerIcon) {
+                        previewEmbedFooterIcon.src = footerIcon;
+                        previewEmbedFooterIcon.classList.remove('hidden');
+                        previewEmbedFooterIcon.onerror = () => previewEmbedFooterIcon.classList.add('hidden');
+                    } else {
+                        previewEmbedFooterIcon.classList.add('hidden');
+                    }
+                } else {
+                    previewEmbedFooterRow.classList.add('hidden');
+                }
+
+            } else {
+                previewEmbedContainer.classList.add('hidden');
+            }
+        }
+
+        [botUsernameInput, botAvatarInput, messageContentInput, embedTitleInput, embedDescriptionInput, embedImageInput, embedThumbnailInput, embedFooterInput, embedFooterIconInput].forEach(el => {
+            el.addEventListener('input', updatePreview);
+        });
+
+        toggleEmbedCheckbox.addEventListener('change', () => {
+            embedFields.classList.toggle('hidden', !toggleEmbedCheckbox.checked);
+            updatePreview();
+        });
+
+        embedColorInput.addEventListener('input', (e) => {
+            embedColorHexInput.value = e.target.value.toUpperCase();
+            updatePreview();
+        });
+        embedColorHexInput.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                embedColorInput.value = e.target.value;
+                updatePreview();
+            }
+        });
+
+        toggleUrlVisibilityBtn.addEventListener('click', () => {
+            const isPassword = webhookUrlInput.type === 'password';
+            webhookUrlInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.innerHTML = isPassword 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.042 10.042 0 013.682-.763c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m-4.692-4.692a3 3 0 00-4.243-4.243m4.243 4.243L3 3l18 18"/>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+        });
+
+        function loadPresets() {
+            const presets = JSON.parse(localStorage.getItem('braziliansammy_system_webhooks') || '[]');
+            presetsContainer.querySelectorAll('.preset-pill').forEach(el => el.remove());
+
+            if (presets.length === 0) {
+                noPresetsText.classList.remove('hidden');
+                return;
+            }
+            noPresetsText.classList.add('hidden');
+
+            presets.forEach((preset, index) => {
+                const pill = document.createElement('div');
+                pill.className = 'preset-pill flex items-center space-x-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 rounded-lg text-xs font-mono text-gray-300 transition-all cursor-pointer group';
+                pill.innerHTML = `
+                    <span class="truncate max-w-[100px]">${preset.name}</span>
+                    <button data-index="${index}" class="remove-preset text-gray-500 hover:text-red-400 font-bold ml-1">×</button>
+                `;
+
+                pill.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-preset')) return;
+                    webhookUrlInput.value = preset.url;
+                    showStatus('Preset carregado com sucesso no campo de destino.', 'info');
+                });
+
+                pill.querySelector('.remove-preset').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletePreset(index);
+                });
+
+                presetsContainer.appendChild(pill);
+            });
+        }
+
+        savePresetBtn.addEventListener('click', () => {
+            const url = webhookUrlInput.value.trim();
+            if (!url) {
+                showStatus('Insira uma URL de webhook válida para salvar.', 'error');
+                return;
+            }
+            const name = prompt('Digite um nome identificador para este Webhook Preset:', 'Servidor Geral');
+            if (!name) return;
+
+            const presets = JSON.parse(localStorage.getItem('braziliansammy_system_webhooks') || '[]');
+            presets.push({ name, url });
+            localStorage.setItem('braziliansammy_system_webhooks', JSON.stringify(presets));
+            loadPresets();
+            showStatus(`Preset "${name}" salvo com sucesso!`, 'success');
+        });
+
+        function deletePreset(index) {
+            const presets = JSON.parse(localStorage.getItem('braziliansammy_system_webhooks') || '[]');
+            presets.splice(index, 1);
+            localStorage.setItem('braziliansammy_system_webhooks', JSON.stringify(presets));
+            loadPresets();
+        }
+
+        validateWebhookBtn.addEventListener('click', async () => {
+            const url = webhookUrlInput.value.trim();
+            if (!url.startsWith('https://discord.com/api/webhooks/')) {
+                showStatus('Formato inválido. O webhook do Discord deve começar com https://discord.com/api/webhooks/', 'error');
+                return;
+            }
+
+            try {
+                validateWebhookBtn.textContent = 'Testando...';
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    showStatus(`Webhook ativo e válido! Canal ID: #${data.channel_id || 'OK'}`, 'success');
+                } else {
+                    showStatus(`Erro ao acessar webhook (HTTP ${res.status}).`, 'error');
+                }
+            } catch (err) {
+                showStatus('Falha de conexão ou restrição CORS ao testar webhook.', 'error');
+            } finally {
+                validateWebhookBtn.textContent = 'Testar';
+            }
+        });
+
+        function buildPayload() {
+            const payload = {};
+
+            if (botUsernameInput.value.trim()) payload.username = botUsernameInput.value.trim();
+            if (botAvatarInput.value.trim()) payload.avatar_url = botAvatarInput.value.trim();
+            if (messageContentInput.value.trim()) payload.content = messageContentInput.value.trim();
+
+            if (toggleEmbedCheckbox.checked) {
+                const embed = {};
+                if (embedTitleInput.value.trim()) embed.title = embedTitleInput.value.trim();
+                if (embedDescriptionInput.value.trim()) embed.description = embedDescriptionInput.value.trim();
+                
+                const hexColor = embedColorHexInput.value.replace('#', '');
+                embed.color = parseInt(hexColor, 16) || 5793266;
+
+                if (embedImageInput.value.trim()) embed.image = { url: embedImageInput.value.trim() };
+                if (embedThumbnailInput.value.trim()) embed.thumbnail = { url: embedThumbnailInput.value.trim() };
+                
+                if (embedFooterInput.value.trim() || embedFooterIconInput.value.trim()) {
+                    embed.footer = {};
+                    if (embedFooterInput.value.trim()) embed.footer.text = embedFooterInput.value.trim();
+                    if (embedFooterIconInput.value.trim()) embed.footer.icon_url = embedFooterIconInput.value.trim();
+                }
+
+                payload.embeds = [embed];
+            }
+
+            return payload;
+        }
+
+        async function sendWebhookRequest(url, payload) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok || response.status === 204) {
+                return true;
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`HTTP ${response.status}: ${errorData.message || 'Erro desconhecido'}`);
+            }
+        }
+
+        sendWebhookBtn.addEventListener('click', async () => {
+            const url = webhookUrlInput.value.trim();
+            if (!url) {
+                showStatus('A URL do Webhook de destino é obrigatória.', 'error');
+                return;
+            }
+
+            const payload = buildPayload();
+
+            if (!payload.content && (!payload.embeds || payload.embeds.length === 0)) {
+                showStatus('O conteúdo não pode estar vazio. Escreva algo ou anexe um embed.', 'error');
+                return;
+            }
+
+            if (isScheduleMode) {
+                const dateVal = scheduleDate.value;
+                const timeVal = scheduleTime.value;
+
+                if (!dateVal || !timeVal) {
+                    showStatus('Selecione a Data e a Hora para agendar.', 'error');
+                    return;
+                }
+
+                const targetDateTime = new Date(`${dateVal}T${timeVal}:00`);
+                if (isNaN(targetDateTime.getTime())) {
+                    showStatus('Data ou hora informada é inválida.', 'error');
+                    return;
+                }
+
+                if (targetDateTime.getTime() <= Date.now()) {
+                    showStatus('A data/hora do agendamento deve ser no futuro.', 'error');
+                    return;
+                }
+
+                try {
+                    sendWebhookBtn.disabled = true;
+                    showStatus('Salvando agendamento na nuvem do Firebase...', 'info');
+
+                    const { collection, addDoc } = window.firebaseCollections;
+                    // AJUSTE CIRÚRGICO: Payload convertido em string JSON para o GitHub Actions ler perfeitamente
+                    await addDoc(collection(window.db, "scheduled_messages"), {
+                        url: url,
+                        payload: JSON.stringify(payload),
+                        targetTime: targetDateTime.getTime(),
+                        createdAt: Date.now()
+                    });
+
+                    showStatus(`MENSAGEM AGENDADA NA NUVEM para ${targetDateTime.toLocaleString('pt-BR')}!`, 'schedule');
+                    playBeep('schedule');
+                    queueBadge.classList.remove('hidden');
+                } catch (err) {
+                    showStatus(`Erro ao salvar no Firebase: ${err.message}`, 'error');
+                    playBeep('error');
+                } finally {
+                    sendWebhookBtn.disabled = false;
+                }
+                return;
+            }
+
+            try {
+                sendWebhookBtn.disabled = true;
+                sendWebhookBtn.classList.add('opacity-50');
+                showStatus('Transmitindo pacote via nó Discord...', 'info');
+
+                await sendWebhookRequest(url, payload);
+
+                showStatus('TRANSMISSÃO CONCLUÍDA COM SUCESSO! Mensagem enviada.', 'success');
+                playBeep('success');
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 80,
+                        spread: 70,
+                        origin: { y: 0.8 },
+                        colors: ['#5865F2', '#00f2fe', '#ff0080', '#10b981']
+                    });
+                }
+            } catch (err) {
+                showStatus(`Falha no envio: ${err.message}`, 'error');
+                playBeep('error');
+            } finally {
+                sendWebhookBtn.disabled = false;
+                sendWebhookBtn.classList.remove('opacity-50');
+            }
+        });
+
+        async function fetchQueueFromCloud() {
+            if (!window.db) {
+                showStatus('Firebase ainda está inicializando...', 'info');
+                return;
+            }
+
+            try {
+                const { collection, getDocs } = window.firebaseCollections;
+                const querySnapshot = await getDocs(collection(window.db, "scheduled_messages"));
+                scheduledCardsGrid.innerHTML = '';
+
+                let count = 0;
+                querySnapshot.forEach((docSnap) => {
+                    count++;
+                    const item = docSnap.data();
+                    const docId = docSnap.id;
+                    const targetDate = new Date(item.targetTime);
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel p-4 rounded-xl border border-white/10 space-y-3 relative overflow-hidden group';
+
+                    let parsedPayload = {};
+                    try {
+                        parsedPayload = typeof item.payload === 'string' ? JSON.parse(item.payload) : item.payload;
+                    } catch (e) {
+                        parsedPayload = {};
+                    }
+
+                    const titleText = parsedPayload.embeds?.[0]?.title || parsedPayload.content || 'Mensagem sem título';
+                    
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div class="space-y-1">
+                                <span class="text-[10px] font-mono bg-cyber-emerald/20 text-emerald-300 px-2 py-0.5 rounded border border-cyber-emerald/30">
+                                    NUVEM: ${targetDate.toLocaleString('pt-BR')}
+                                </span>
+                                <h3 class="text-sm font-bold text-white line-clamp-1 mt-1">${titleText}</h3>
+                            </div>
+                            <button data-id="${docId}" class="delete-cloud-scheduled text-gray-500 hover:text-red-400 p-1 rounded transition-colors">
+                                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="text-xs font-mono text-gray-400 bg-cyber-bg/80 p-2 rounded-lg truncate">
+                            Target: ${item.url}
+                        </div>
+
+                        <div class="flex items-center justify-between text-[11px] font-mono text-cyber-cyan pt-1">
+                            <span>STATUS:</span>
+                            <span class="font-bold text-emerald-400">Armazenado no Firestore</span>
+                        </div>
+                    `;
+
+                    card.querySelector('.delete-cloud-scheduled').addEventListener('click', () => {
+                        deleteCloudItem(docId);
+                    });
+
+                    scheduledCardsGrid.appendChild(card);
+                });
+
+                if (count > 0) {
+                    emptyQueueMessage.classList.add('hidden');
+                    queueBadge.textContent = count;
+                    queueBadge.classList.remove('hidden');
+                } else {
+                    emptyQueueMessage.classList.remove('hidden');
+                    queueBadge.classList.add('hidden');
+                }
+            } catch (err) {
+                showStatus('Erro ao carregar fila da nuvem.', 'error');
+            }
+        }
+
+        async function deleteCloudItem(docId) {
+            if (!confirm('Deseja remover este agendamento do banco de dados na nuvem?')) return;
+            try {
+                const { doc, deleteDoc } = window.firebaseCollections;
+                await deleteDoc(doc(window.db, "scheduled_messages", docId));
+                fetchQueueFromCloud();
+                showStatus('Agendamento removido da nuvem.', 'info');
+            } catch (err) {
+                showStatus('Erro ao excluir item.', 'error');
+            }
+        }
+
+        function showStatus(text, type) {
+            statusConsole.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400', 'bg-red-500/10', 'border-red-500/30', 'text-red-400', 'bg-cyber-blue/10', 'border-cyber-blue/30', 'text-cyber-cyan', 'bg-cyber-emerald/10', 'border-cyber-emerald/30', 'text-emerald-300');
+
+            if (type === 'success') {
+                statusConsole.classList.add('bg-emerald-500/10', 'border-emerald-500/30', 'text-emerald-400');
+            } else if (type === 'error') {
+                statusConsole.classList.add('bg-red-500/10', 'border-red-500/30', 'text-red-400');
+            } else if (type === 'schedule') {
+                statusConsole.classList.add('bg-cyber-emerald/10', 'border-cyber-emerald/30', 'text-emerald-300');
+            } else {
+                statusConsole.classList.add('bg-cyber-blue/10', 'border-cyber-blue/30', 'text-cyber-cyan');
+            }
+
+            statusConsole.textContent = `[LOG DE TRANSMISSÃO]: ${text}`;
+        }
+
+        resetFormBtn.addEventListener('click', () => {
+            messageContentInput.value = '';
+            embedTitleInput.value = '';
+            embedDescriptionInput.value = '';
+            embedImageInput.value = '';
+            embedThumbnailInput.value = '';
+            embedFooterInput.value = '';
+            embedFooterIconInput.value = '';
+            toggleEmbedCheckbox.checked = false;
+            embedFields.classList.add('hidden');
+            updatePreview();
+            showStatus('Todos os campos do formulário foram limpados.', 'info');
+        });
+
+        loadPresets();
+        updatePreview();
     </script>
 </body>
 </html>
